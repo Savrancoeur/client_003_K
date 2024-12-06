@@ -118,7 +118,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="./member.php" aria-label="Go to Member Dashboard">
+                                <a class="dropdown-item" href="./profile.php" aria-label="Go to Member Dashboard">
                                     Member
                                 </a>
                             </li>
