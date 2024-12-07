@@ -21,6 +21,9 @@
     <!--font-awesome.min.css-->
     <link rel="stylesheet" href="../../public/libs/fontawesome-6/css/fontawesome.min.css" />
 
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="../../public/libs/sweetalert/sweetalert2.min.css" />
+
     <!--linear icon css-->
     <link rel="stylesheet" href="../../public/libs/linearicons/linearicons.css" />
 
@@ -137,8 +140,12 @@
         </div>
     </nav>
 
+    <!-- Alert Box -->
+    <div id="alert-box" class="mb-4"></div>
+
     <!-- Background Overlay Section -->
     <section class="bg-overlay-section">
+
         <div class="overlay">
             <div class="content">
                 <h1>Welcome to Our Sports Club</h1>
@@ -381,6 +388,10 @@
 
     <!--footer end-->
 
+    <!-- SweetAlert2 JavaScript -->
+    <script src="../../public/libs/sweetalert/sweetalert2.all.min.js"></script>
+
+    <!-- jquery js link -->
     <script src="../../public/libs/jquery/jquery-3.7.1.min.js"></script>
 
     <!--modernizr.min.js-->
