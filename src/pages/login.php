@@ -1,3 +1,26 @@
+<?php
+
+// to show error codes
+ini_set("display_errors", 1);
+
+// call dbconnection file to use
+require_once "dbconnect.php";
+
+// to create session if not exist
+if (!isset($_SESSION)) {
+    session_start();
+}
+
+$failmessage = "";
+
+if (isset($_SESSION['login-error'])) {
+    $failmessage = $_SESSION['login-error'];
+}
+
+// echo $failmessage;
+
+?>
+
 <!DOCTYPE html>
 <html class="no-js" lang="en">
 
@@ -19,7 +42,7 @@
     <title>AUS Sport Club</title>
 
     <!--font-awesome.min.css-->
-    <link rel="stylesheet" href="../../public/libs/fontawesome-6/css/fontawesome.min.css" />
+    <link rel="stylesheet" href="../../public/libs/fontawesome-6/css/all.min.css" />
 
     <!--linear icon css-->
     <link rel="stylesheet" href="../../public/libs/linearicons/linearicons.css" />
@@ -39,6 +62,7 @@
 
     <!--register.css-->
     <link rel="stylesheet" href="../css/register.css" />
+    <link rel="stylesheet" href="../css/toast.css" />
 </head>
 
 <body>
@@ -48,20 +72,20 @@
             <div class="register-content">
                 <div class="register-form">
                     <h2>Login in Here!</h2>
-                    <form action="" method="POST">
+                    <form action="signinfunction.php" method="POST">
 
                         <div class="form-group">
                             <label for="email">Email</label>
-                            <input type="email" id="email" name="email" placeholder="Your Email" />
+                            <input type="email" id="email" name="user-email" placeholder="Your Email" required/>
                         </div>
                         <div class="form-group">
                             <label for="password">Password</label>
-                            <input type="password" id="password" name="password" placeholder="Your Password" />
+                            <input type="password" id="password" name="user-password" placeholder="Your Password" required/>
                         </div>
                         <div class="page-redirect">
                             <p>Didn't have an acoount? <a href="">Sign up</a> Here!</p>
                         </div>
-                        <button type="submit" class="register-btn">
+                        <button type="submit" name="login" class="register-btn">
                             <a href="">Login</a>
                         </button>
                     </form>
@@ -72,6 +96,26 @@
             </div>
         </div>
     </section>
+
+    <?php if ($failmessage != null) { ?>
+        <div class="toasts actives">
+            <div class="toast-contents">
+                <i class="fas fa-times bg-danger check"></i>
+
+                <div class="message">
+                    <span class="text text-1">Failed</span>
+                    <span class="text text-2"><?php echo $failmessage ?></span>
+                </div>
+            </div>
+            <i class="fas fa-times closes"></i>
+
+            <div class="progress actives"></div>
+        </div>
+    <?php
+        unset($_SESSION['login-error']);
+        $failmessage = '';
+    }
+    ?>
 
     <script src="../../public/libs/jquery/jquery-3.7.1.min.js"></script>
 
@@ -85,6 +129,8 @@
     <script src="../../public/libs/owl-carousel/owl.carousel.min.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+    <script type="text/javascript" src="../js/toast.js"></script>
+
 </body>
 
 </html>
