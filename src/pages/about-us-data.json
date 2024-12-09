@@ -15,17 +15,17 @@
       {
         "name": "John Doe",
         "role": "Head Coach",
-        "image": "images/john_doe.jpg"
+        "image": "public/images/about/coach1.png"
       },
       {
         "name": "Sarah Smith",
         "role": "Event Coordinator",
-        "image": "images/sarah_smith.jpg"
+        "image": "public/images/about/coach2.png"
       },
       {
         "name": "Michael Brown",
         "role": "Fitness Trainer",
-        "image": "images/michael_brown.jpg"
+        "image": "public/images/about/coach3.png"
       }
     ]
   }

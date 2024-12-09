@@ -170,30 +170,24 @@
                     <div class="icon-container">
                         <i class="fa-solid fa-bullseye" aria-hidden="true"></i>
                     </div>
-                    <h3>Our Mission</h3>
-                    <p>
-                        To empower individuals through sports, fostering teamwork,
-                        fitness, and fun while encouraging personal growth.
+                    <h3 id="mission-title"></h3>
+                    <p id="mission-desc">
                     </p>
                 </div>
                 <div class="card">
                     <div class="icon-container">
                         <i class="fa-regular fa-lightbulb" aria-hidden="true"></i>
                     </div>
-                    <h3>Our Vision</h3>
-                    <p>
-                        To be a recognized leader in promoting health, unity, and
-                        sportsmanship within the community.
+                    <h3 id="vision-title"></h3>
+                    <p id="vision-desc">
                     </p>
                 </div>
                 <div class="card">
                     <div class="icon-container">
                         <i class="fa-regular fa-heart" aria-hidden="true"></i>
                     </div>
-                    <h3>Our Values</h3>
-                    <p>
-                        Respect, integrity, innovation, and teamwork guide us in building
-                        a strong and welcoming environment.
+                    <h3 id="values-title"></h3>
+                    <p id="values-desc">
                     </p>
                 </div>
             </div>
@@ -209,22 +203,7 @@
     <section class="team-section">
         <div class="container">
             <h2>Meet Our Team</h2>
-            <div class="team-grid">
-                <div class="team-member">
-                    <img src="../../public/images/about/coach1.png" alt="John Doe - Head Coach" />
-                    <h3>John Doe</h3>
-                    <p>Head Coach</p>
-                </div>
-                <div class="team-member">
-                    <img src="../../public/images/about/coach2.png" alt="Sarah Smith - Event Coordinator" />
-                    <h3>Sarah Smith</h3>
-                    <p>Event Coordinator</p>
-                </div>
-                <div class="team-member">
-                    <img src="../../public/images/about/coach3.png" alt="Michael Brown - Fitness Trainer" />
-                    <h3>Michael Brown</h3>
-                    <p>Fitness Trainer</p>
-                </div>
+            <div class="team-grid" id="team-container">
             </div>
         </div>
     </section>
