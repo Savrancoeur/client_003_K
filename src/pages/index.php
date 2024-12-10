@@ -1,3 +1,123 @@
+<?php
+
+// to show error codes
+ini_set("display_errors", 1);
+
+// call dbconnection file to use
+require_once "dbconnect.php";
+
+// creat session if not created
+if (!isset($_SESSION)) {
+    session_start();
+}
+
+// making default time zone
+date_default_timezone_set("Asia/Yangon");
+
+$date = date("Y-m-d");
+
+$toastmessage = "";
+$sports = null;
+$locations = null;
+$toshowevents = null;
+$checkfilter = false;
+
+function sportall()
+{
+    try {
+        $conn = connect();
+        $sql = "SELECT * FROM sports";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    } catch (PDOException $e) {
+        echo $e->getMessage();
+    }
+}
+
+function sportbyid($id)
+{
+    try {
+        $conn = connect();
+        $sql = "SELECT * FROM sports WHERE id=?";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$id]);
+        return $stmt->fetch();
+    } catch (PDOException $e) {
+        echo $e->getMessage();
+    }
+}
+
+function eventlocations()
+{
+    try {
+        $conn = connect();
+        $sql = "SELECT DISTINCT location FROM events ORDER BY location;";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    } catch (PDOException $e) {
+        echo $e->getMessage();
+    }
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["filter-btn"])) {
+    $checkfilter = true;
+    $arrayofcolumn = [];
+    $arrayofvalues = [];
+    if (isset($_POST["date-filter"])) {
+        array_push($arrayofcolumn, 'date');
+        array_push($arrayofvalues, $_POST["date-filter"]);
+    }
+    if ($_POST["sport-filter"] != 0) {
+        array_push($arrayofcolumn, 'sports_id');
+        array_push($arrayofvalues, $_POST["date-filter"]);
+    }
+    if ($_POST["location-filter"] != 0) {
+        array_push($arrayofcolumn, 'location');
+        array_push($arrayofvalues, $_POST["location-filter"]);
+    }
+    if ($_POST["age-filter"] != 0) {
+        array_push($arrayofcolumn, 'agegroup');
+        array_push($arrayofvalues, $_POST["age-filter"]);
+    }
+    //    var_dump($filer_column_array);
+    //    var_dump($filter_value_array);
+
+    try {
+        $conn = connect();
+        $sql = 'SELECT * FROM events WHERE ';
+        for ($i = 0; $i < count($arrayofcolumn); $i++) {
+            if ($i == count($arrayofcolumn) - 1) {
+                $sql .= $arrayofcolumn[$i] . "=?";
+            } else {
+                $sql .= $arrayofcolumn[$i] . "=? AND ";
+            }
+        }
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($arrayofvalues);
+        $toshowevents = $stmt->fetchAll();
+    } catch (PDOException $e) {
+        echo $e->getMessage();
+    }
+}
+
+if (isset($_SESSION['login-success'])) {
+    $toastmessage = $_SESSION['login-success'];
+} elseif (isset($_SESSION['signup-success'])) {
+    $toastmessage = $_SESSION['signup-success'];
+}
+
+$sports = sportall();
+$locations = eventlocations();
+// var_dump($locations);
+//echo $newdate;
+// var_dump($showevents);
+
+
+?>
+
+
 <!DOCTYPE html>
 <html class="no-js" lang="en">
 
@@ -19,7 +139,7 @@
     <title>AUS Sport Club</title>
 
     <!--font-awesome.min.css-->
-    <link rel="stylesheet" href="../../public/libs/fontawesome-6/css/fontawesome.min.css" />
+    <link rel="stylesheet" href="../../public/libs/fontawesome-6/css/all.min.css" />
 
     <!-- SweetAlert2 CSS -->
     <link rel="stylesheet" href="../../public/libs/sweetalert/sweetalert2.min.css" />
@@ -54,6 +174,7 @@
 
     <!--responsive.css-->
     <link rel="stylesheet" href="../css/responsive.css" />
+    <link rel="stylesheet" href="../css/toast.css" />
 </head>
 
 <body>
@@ -95,53 +216,48 @@
 
                 <ul class="navbar-nav ml-auto d-flex align-items-center">
                     <!-- Sign In/Up Dropdown -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="signInDropdown" role="button"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Sign In/Up
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="signInDropdown">
-                            <a class="dropdown-item" href="./login.php" aria-label="Navigate to Login">Login</a>
-                            <a class="dropdown-item" href="./register.php"
-                                aria-label="Navigate to Register">Register</a>
-                        </div>
-                    </li>
 
-                    <!-- Profile Dropdown -->
-                    <li class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" id="profileDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false" aria-label="Profile Menu">
-                            <img src="../../public/images/pf_logo.png" style="width: 30px" alt="Profile"
-                                class="profile-pic" />
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-                            <li>
-                                <a class="dropdown-item" href="./admin.php" aria-label="Go to Admin Panel">
-                                    Admin
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="./profile.php" aria-label="Go to Member Dashboard">
-                                    Member
-                                </a>
-                            </li>
-                            <li>
-                                <hr class="dropdown-divider" />
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="./logout.php" aria-label="Logout">
-                                    Logout
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
+                    <?php if (!isset($_SESSION['email'])) { ?>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="signInDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Sign In/Up
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="signInDropdown">
+                                <a class="dropdown-item" href="./login.php" aria-label="Navigate to Login">Login</a>
+                                <a class="dropdown-item" href="./register.php"
+                                    aria-label="Navigate to Register">Register</a>
+                            </div>
+                        </li>
+                    <?php } else { ?>
+                        <!-- Profile Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" id="profileDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false" aria-label="Profile Menu">
+                                <img src="../../public/images/pf_logo.png" style="width: 30px" alt="Profile"
+                                    class="profile-pic" />
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                                <li>
+                                    <a class="dropdown-item" href="./profile.php" aria-label="Go to Member Dashboard">
+                                        Profile
+                                    </a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider" />
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="./logoutfunction.php" aria-label="Logout">
+                                        Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    <?php } ?>
                 </ul>
             </div>
         </div>
     </nav>
-
-    <!-- Alert Box -->
-    <div id="alert-box" class="mb-4"></div>
 
     <!-- Background Overlay Section -->
     <section class="bg-overlay-section">
@@ -154,7 +270,7 @@
                     camaraderie.
                 </p>
                 <div class="cta-buttons">
-                    <a href="#learn-more" class="btn btn-learn">Learn More</a>
+                    <a href="aboutus.php" class="btn btn-learn">Learn More</a>
                     <a href="#get-started" class="btn btn-start">Get Started</a>
                 </div>
             </div>
@@ -169,45 +285,49 @@
                 <div class="col-md-6">
                     <div class="filter-events-box p-4">
                         <h4 class="text-white text-center mb-4">Filter Events</h4>
-                        <form>
+                        <form action="index.php" method="POST">
                             <div class="row mb-3">
                                 <label class="col-12 text-white mb-2" for="date">Date:</label>
                                 <div class="col-12">
-                                    <input type="date" id="date" class="form-control" placeholder="mm/dd/yyyy" />
+                                    <input type="date" name="date-filter" min="<?php echo $date ?> id=" date" class="form-control" placeholder="mm/dd/yyyy" required />
                                 </div>
                             </div>
                             <div class="row mb-3">
                                 <label class="col-12 text-white mb-2" for="sport">Sport:</label>
                                 <div class="col-12">
-                                    <select id="sport" class="form-control">
-                                        <option value="">All Sports</option>
-                                        <option value="soccer">Soccer</option>
-                                        <option value="tennis">Tennis</option>
-                                        <option value="volleyball">Volleyball</option>
+                                    <select id="sport" name="sport-filter" class="form-select" required>
+                                        <option value="0" selected>All Sports Types</option>
+                                        <?php foreach ($sports as $sport) {
+                                            echo '<option value="' . $sport['id'] . '">' . $sport['name'] . '</option>';
+                                        } ?>
                                     </select>
                                 </div>
                             </div>
                             <div class="row mb-3">
                                 <label class="col-12 text-white mb-2" for="location">Location:</label>
                                 <div class="col-12">
-                                    <input type="text" id="location" class="form-control"
-                                        placeholder="Enter location" />
+                                    <select name="location-filter" id="location-selection" class="form-select" required>
+                                        <option value="0" selected>All Event Location</option>
+                                        <?php foreach ($locations as $location) {
+                                            echo '<option value="' . $location['location'] . '">' . ucwords($location['location']) . '</option>';
+                                        } ?>
+                                    </select>
                                 </div>
                             </div>
                             <div class="row mb-3">
                                 <label class="col-12 text-white mb-2" for="age">Age Group:</label>
                                 <div class="col-12">
-                                    <select id="age" class="form-control">
-                                        <option value="">Age Group</option>
-                                        <option value="all">All Ages</option>
-                                        <option value="under-18">Under 18</option>
-                                        <option value="18-25">18-25</option>
-                                        <option value="25+">25+</option>
+                                    <select id="age" name="age-filter" class="form-select">
+                                        <option value="0" selected>All age</option>
+                                        <option value="child">Child (under 15)</option>
+                                        <option value="teen">Teen (Between 16 and 23)</option>
+                                        <option value="adult">Adult (Over 23)</option>
+                                        <option value="all">No Age Limit</option>
                                     </select>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-dark w-100">
-                                <a href="">Enter</a>
+                            <button type="submit" name="filter-btn" class="btn btn-dark w-100">
+                                Filter Event
                             </button>
                         </form>
                     </div>
@@ -215,36 +335,27 @@
 
                 <!-- Upcoming Events Section -->
                 <div class="col-md-6">
-                    <div class="upcoming-events-box p-4">
-                        <h4 class="text-white text-center mb-4">Upcoming Events</h4>
-                        <div
-                            class="event-card bg-white mb-3 p-3 rounded d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="mb-1">2 Jan, 2025</h6>
-                                <p class="mb-0">Tennis Tournament</p>
-                                <p class="text-muted mb-0">At Stadium</p>
-                            </div>
-                            <a href="#" class="btn btn-sm btn-dark">Register Now</a>
+                    <?php if ($checkfilter) { ?>
+                        <div class="upcoming-events-box p-4">
+                            <h4 class="text-white text-center mb-4">Upcoming Events</h4>
+                            <?php if ($toshowevents) { ?>
+                                <?php foreach ($toshowevents as $event) { ?>
+                                    <div class="event-card bg-white mb-3 p-3 rounded d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1"><?php echo date("F j, Y", strtotime($event['date'])); ?></h6>
+                                            <p class="mb-0"><?php echo ucwords($event['name']) ?></p>
+                                            <p class="text-muted mb-0"><?php echo ucwords($event['location']) ?></p>
+                                        </div>
+                                        <a href="eventdetails.php?eventid=<?php echo $event['id'] ?>" class="btn btn-sm btn-dark">View Detail</a>
+                                    </div>
+                                <?php } ?>
+                            <?php } else { ?>
+                                <div class="event-card bg-white mb-3 p-3 rounded">
+                                        <h5 class="text-center mx-2">The filter events is not found</h5>
+                                </div>
+                            <?php } ?>
                         </div>
-                        <div
-                            class="event-card bg-white mb-3 p-3 rounded d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="mb-1">5 Jan, 2025</h6>
-                                <p class="mb-0">Soccer</p>
-                                <p class="text-muted mb-0">At Stadium</p>
-                            </div>
-                            <a href="#" class="btn btn-sm btn-dark">Register Now</a>
-                        </div>
-                        <div
-                            class="event-card bg-white mb-3 p-3 rounded d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="mb-1">9 Jan, 2025</h6>
-                                <p class="mb-0">Volleyball</p>
-                                <p class="text-muted mb-0">At Stadium</p>
-                            </div>
-                            <a href="#" class="btn btn-sm btn-dark">Register Now</a>
-                        </div>
-                    </div>
+                    <?php } ?>
                 </div>
             </div>
         </div>
@@ -288,7 +399,7 @@
                             Be part of something bigger. Sign up today and experience sports
                             like never before!
                         </p>
-                        <a href="#register" class="btn btn-dark btn-lg">Join Us Now</a>
+                        <a href="register.php" class="btn btn-dark btn-lg">Join Us Now</a>
                     </div>
                 </div>
             </div>
@@ -388,6 +499,27 @@
 
     <!--footer end-->
 
+    <?php if ($toastmessage != null) { ?>
+        <div class="toasts actives">
+            <div class="toast-contents">
+                <i class="fas fa-check check"></i>
+
+                <div class="message">
+                    <span class="text text-1">Success</span>
+                    <span class="text text-2"><?php echo $toastmessage ?></span>
+                </div>
+            </div>
+            <i class="fas fa-times closes"></i>
+
+            <div class="progress actives"></div>
+        </div>
+    <?php
+        unset($_SESSION['login-success']);
+        unset($_SESSION['signup-success']);
+        $toastmessage = '';
+    }
+    ?>
+
     <!-- SweetAlert2 JavaScript -->
     <script src="../../public/libs/sweetalert/sweetalert2.all.min.js"></script>
 
@@ -413,6 +545,7 @@
 
     <!-- footer js -->
     <script src="../js/footer.js"></script>
+    <script src="../js/toast.js"></script>
 </body>
 
 </html>

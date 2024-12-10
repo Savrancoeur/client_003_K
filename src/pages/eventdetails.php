@@ -1,3 +1,36 @@
+<?php
+
+// to show error codes
+ini_set("display_errors", 1);
+
+// call dbconnection file to use
+require_once "dbconnect.php";
+
+// creat session if not created
+if (!isset($_SESSION)) {
+    session_start();
+}
+
+if (!isset($_GET['eventid'])) {
+    header("Location:events.php");
+}
+
+function eventbyid($eventid)
+{
+    try {
+        $conn = connect();
+        $stmt = $conn->prepare("SELECT * FROM events WHERE id=?");
+        $stmt->execute([$eventid]);
+        return $stmt->fetch();
+    } catch (PDOException $e) {
+        echo $e->getMessage();
+    }
+}
+
+$toshowevent = eventbyid($_GET['eventid']);
+
+?>
+
 <!DOCTYPE html>
 <html class="no-js" lang="en">
 
@@ -99,46 +132,44 @@
 
                 <ul class="navbar-nav ml-auto d-flex align-items-center">
                     <!-- Sign In/Up Dropdown -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="signInDropdown" role="button"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Sign In/Up
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="signInDropdown">
-                            <a class="dropdown-item" href="./login.php" aria-label="Navigate to Login">Login</a>
-                            <a class="dropdown-item" href="./register.php"
-                                aria-label="Navigate to Register">Register</a>
-                        </div>
-                    </li>
 
-                    <!-- Profile Dropdown -->
-                    <li class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" id="profileDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false" aria-label="Profile Menu">
-                            <img src="../../public/images/pf_logo.png" style="width: 30px" alt="Profile"
-                                class="profile-pic" />
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-                            <li>
-                                <a class="dropdown-item" href="./admin.php" aria-label="Go to Admin Panel">
-                                    Admin
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="./profile.php" aria-label="Go to Member Dashboard">
-                                    Member
-                                </a>
-                            </li>
-                            <li>
-                                <hr class="dropdown-divider" />
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="./logout.php" aria-label="Logout">
-                                    Logout
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
+                    <?php if (!isset($_SESSION['email'])) { ?>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="signInDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Sign In/Up
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="signInDropdown">
+                                <a class="dropdown-item" href="./login.php" aria-label="Navigate to Login">Login</a>
+                                <a class="dropdown-item" href="./register.php"
+                                    aria-label="Navigate to Register">Register</a>
+                            </div>
+                        </li>
+                    <?php } else { ?>
+                        <!-- Profile Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" id="profileDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false" aria-label="Profile Menu">
+                                <img src="../../public/images/pf_logo.png" style="width: 30px" alt="Profile"
+                                    class="profile-pic" />
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                                <li>
+                                    <a class="dropdown-item" href="./profile.php" aria-label="Go to Member Dashboard">
+                                        Profile
+                                    </a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider" />
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="./logoutfunction.php" aria-label="Logout">
+                                        Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    <?php } ?>
                 </ul>
             </div>
         </div>
@@ -150,7 +181,7 @@
             <div class="event-details">
                 <!-- Event Image (Left Side) -->
                 <div class="event-image" aria-describedby="event-image-description">
-                    <img src="../../public/images/events/basketball.png" alt="Basketball Tournament"
+                    <img src="../../<?php echo $toshowevent['image'] ?>" alt="<?php echo ucwords($toshowevent['name']) ?>"
                         aria-labelledby="event-image-description" />
                     <p id="event-image-description" class="sr-only">
                         Image showing a basketball game in action, representing the event.
@@ -159,45 +190,41 @@
 
                 <!-- Event Details (Right Side) -->
                 <div class="event-info">
-                    <h2 id="event-details-heading">Basketball Tournament</h2>
+                    <h2 id="event-details-heading"><?php echo ucwords($toshowevent['name']) ?></h2>
                     <p class="event-description" aria-describedby="event-description">
-                        Join us for an exciting basketball tournament where teams from
-                        across the region will compete for the title of champion! Whether
-                        you're playing or spectating, it will be an event you won't want
-                        to miss!
-                    </p>
-                    <p id="event-description" class="sr-only">
-                        The event description outlines the excitement of the basketball
-                        tournament and invites individuals to participate.
+                        <?php echo ucwords($toshowevent['description']) ?>
                     </p>
 
                     <div class="event-meta" aria-labelledby="event-meta">
                         <p>
-                            <strong><i class="fa fa-calendar-alt"></i> Date:</strong> 25th
-                            December 2024
+                            <strong><i class="fa fa-calendar-alt"></i> Date:</strong> <?php echo date("j-F-Y", strtotime($toshowevent['date'])); ?>
                         </p>
                         <p>
-                            <strong><i class="fa fa-clock"></i> Time:</strong> 3:00 PM
+                            <strong><i class="fa fa-clock"></i> Time:</strong> <?php echo $toshowevent['time'] ?>
                         </p>
                         <p>
                             <strong><i class="fa fa-calendar-check"></i> Registration
-                                Deadline:</strong>
-                            20th December 2024
+                                Deadline:</strong> <?php echo date("j-F-Y", strtotime($toshowevent['duedate'])); ?>
                         </p>
                         <p>
-                            <strong><i class="fa fa-child"></i> Age Limit:</strong> 16-25
+                            <strong><i class="fa fa-child"></i> Age Limit:</strong> <?php echo ucwords($toshowevent['agegroup']) ?>
                             years
                         </p>
                         <p>
-                            <strong><i class="fa fa-users"></i> Participant Limit:</strong>
-                            50 players
+                            <strong><i class="fa fa-users"></i> Participant Limit:</strong> <?php echo $toshowevent['participantslimit'] ?> players
                         </p>
                     </div>
 
                     <div class="register-btn-container">
-                        <a href="./auth.html" class="register-btn">
-                            <button type="button">Register</button>
-                        </a>
+                        <?php if (isset($_SESSION['email'])) { ?>
+                            <a href="profile.php?eventid=<?php echo $toshowevent['id'] ?>" class="register-btn">
+                                <button type="button">Register</button>
+                            </a>
+                        <?php } else { ?>
+                            <a href="register.php" class="register-btn">
+                                <button type="button">Register</button>
+                            </a>
+                        <?php } ?>
                     </div>
                 </div>
             </div>

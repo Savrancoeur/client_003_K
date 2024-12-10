@@ -1,3 +1,18 @@
+<?php
+
+// to show error codes
+ini_set("display_errors", 1);
+
+// call dbconnection file to use
+require_once "dbconnect.php";
+
+// creat session if not created
+if (!isset($_SESSION)) {
+    session_start();
+}
+
+?>
+
 <!DOCTYPE html>
 <html class="no-js" lang="en">
 
@@ -99,46 +114,44 @@
 
                 <ul class="navbar-nav ml-auto d-flex align-items-center">
                     <!-- Sign In/Up Dropdown -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="signInDropdown" role="button"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Sign In/Up
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="signInDropdown">
-                            <a class="dropdown-item" href="./login.php" aria-label="Navigate to Login">Login</a>
-                            <a class="dropdown-item" href="./register.php"
-                                aria-label="Navigate to Register">Register</a>
-                        </div>
-                    </li>
 
-                    <!-- Profile Dropdown -->
-                    <li class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" id="profileDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false" aria-label="Profile Menu">
-                            <img src="../../public/images/pf_logo.png" style="width: 30px" alt="Profile"
-                                class="profile-pic" />
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-                            <li>
-                                <a class="dropdown-item" href="./admin.php" aria-label="Go to Admin Panel">
-                                    Admin
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="./profile.php" aria-label="Go to Member Dashboard">
-                                    Member
-                                </a>
-                            </li>
-                            <li>
-                                <hr class="dropdown-divider" />
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="./logout.php" aria-label="Logout">
-                                    Logout
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
+                    <?php if (!isset($_SESSION['email'])) { ?>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="signInDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Sign In/Up
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="signInDropdown">
+                                <a class="dropdown-item" href="./login.php" aria-label="Navigate to Login">Login</a>
+                                <a class="dropdown-item" href="./register.php"
+                                    aria-label="Navigate to Register">Register</a>
+                            </div>
+                        </li>
+                    <?php } else { ?>
+                        <!-- Profile Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" id="profileDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false" aria-label="Profile Menu">
+                                <img src="../../public/images/pf_logo.png" style="width: 30px" alt="Profile"
+                                    class="profile-pic" />
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                                <li>
+                                    <a class="dropdown-item" href="./profile.php" aria-label="Go to Member Dashboard">
+                                        Profile
+                                    </a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider" />
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="./logoutfunction.php" aria-label="Logout">
+                                        Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    <?php } ?>
                 </ul>
             </div>
         </div>

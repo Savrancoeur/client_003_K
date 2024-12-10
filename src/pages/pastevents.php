@@ -1,3 +1,39 @@
+<?php
+
+// to show error codes
+ini_set("display_errors", 1);
+
+// call dbconnection file to use
+require_once "dbconnect.php";
+
+// creat session if not created
+if (!isset($_SESSION)) {
+    session_start();
+}
+
+function completeevents()
+{
+    try {
+        $conn = connect();
+        $stmt = $conn->prepare("SELECT * FROM events WHERE status=? ORDER BY id DESC");
+        $stmt->execute(['finished']);
+        return $stmt->fetchAll();
+    } catch (PDOException $e) {
+        echo $e->getMessage();
+    }
+}
+
+
+
+$pastevents = completeevents();
+
+// var_dump($allevents);
+
+
+
+?>
+
+
 <!DOCTYPE html>
 <html class="no-js" lang="en">
 
@@ -99,46 +135,44 @@
 
                 <ul class="navbar-nav ml-auto d-flex align-items-center">
                     <!-- Sign In/Up Dropdown -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="signInDropdown" role="button"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Sign In/Up
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="signInDropdown">
-                            <a class="dropdown-item" href="./login.php" aria-label="Navigate to Login">Login</a>
-                            <a class="dropdown-item" href="./register.php"
-                                aria-label="Navigate to Register">Register</a>
-                        </div>
-                    </li>
 
-                    <!-- Profile Dropdown -->
-                    <li class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" id="profileDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false" aria-label="Profile Menu">
-                            <img src="../../public/images/pf_logo.png" style="width: 30px" alt="Profile"
-                                class="profile-pic" />
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-                            <li>
-                                <a class="dropdown-item" href="./admin.php" aria-label="Go to Admin Panel">
-                                    Admin
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="./profile.php" aria-label="Go to Member Dashboard">
-                                    Member
-                                </a>
-                            </li>
-                            <li>
-                                <hr class="dropdown-divider" />
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="./logout.php" aria-label="Logout">
-                                    Logout
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
+                    <?php if (!isset($_SESSION['email'])) { ?>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="signInDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Sign In/Up
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="signInDropdown">
+                                <a class="dropdown-item" href="./login.php" aria-label="Navigate to Login">Login</a>
+                                <a class="dropdown-item" href="./register.php"
+                                    aria-label="Navigate to Register">Register</a>
+                            </div>
+                        </li>
+                    <?php } else { ?>
+                        <!-- Profile Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" id="profileDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false" aria-label="Profile Menu">
+                                <img src="../../public/images/pf_logo.png" style="width: 30px" alt="Profile"
+                                    class="profile-pic" />
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                                <li>
+                                    <a class="dropdown-item" href="./profile.php" aria-label="Go to Member Dashboard">
+                                        Profile
+                                    </a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider" />
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="./logoutfunction.php" aria-label="Logout">
+                                        Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    <?php } ?>
                 </ul>
             </div>
         </div>
@@ -155,110 +189,30 @@
             </p>
 
             <div class="row">
-                <!-- Event Card 1 -->
-                <div class="col-md-4" role="region" aria-labelledby="event-1-heading">
-                    <div class="event-card" aria-describedby="event-1-description">
-                        <div class="event-status">
-                            <span class="tag past" role="status" aria-live="polite">Completed</span>
-                        </div>
-                        <img src="../../public/images/events/basketball.png" alt="Basketball Tournament"
-                            aria-labelledby="event-1-heading" />
-                        <div class="event-content">
-                            <h3 id="event-1-heading">Basketball Tournament</h3>
-                            <p>
-                                <i class="fa fa-location-dot" aria-hidden="true"></i> Mandalay
-                                Stadium
-                            </p>
-                            <p>
-                                <i class="fa fa-calendar-alt" aria-hidden="true"></i> 25th
-                                December 2024
-                            </p>
-                            <p><i class="fa fa-clock" aria-hidden="true"></i> 3:00 PM</p>
-                            <p>
-                                <i class="fa fa-child" aria-hidden="true"></i> Age Group:
-                                16-25 years
-                            </p>
-                            <p id="event-1-description" class="event-summary">
-                                The basketball tournament was a huge success with fierce
-                                competition and amazing sportsmanship.
-                            </p>
-                            <a href="./eventdetails.html" class="details-btn"
-                                aria-label="View details of Basketball Tournament">
-                                <button type="button">View Details</button>
-                            </a>
+                <?php foreach ($pastevents as $event) { ?>
+                    <div class="col-md-4">
+                        <div class="event-card">
+                            <div class="event-status">
+                                <span class="tag <?php if ($event['status'] == "upcoming") {
+                                                        echo "upcoming";
+                                                    } else {
+                                                        echo "past";
+                                                    } ?>"><?php echo ucwords($event['status']) ?></span>
+                            </div>
+                            <img src="../../<?php echo $event['image'] ?>" alt="Basketball Tournament" />
+                            <div class="event-content">
+                                <h3><?php echo ucwords($event['name']) ?></h3>
+                                <p><i class="fa fa-location-dot"></i> <?php echo ucwords($event['location']) ?></p>
+                                <p><i class="fa fa-calendar-alt"></i> <?php echo date("j-F-Y", strtotime($event['date'])); ?></p>
+                                <p><i class="fa fa-clock"></i> <?php echo $event['time'] ?></p>
+                                <p><i class="fa fa-child"></i> Age Group: <?php echo ucwords($event['agegroup']) ?></p>
+                                <a href="./eventdetails.php?eventid=<?php echo $event['id'] ?>" class="details-btn">
+                                    <button type="button">View Details</button>
+                                </a>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Event Card 1 -->
-                <div class="col-md-4" role="region" aria-labelledby="event-1-heading">
-                    <div class="event-card" aria-describedby="event-1-description">
-                        <div class="event-status">
-                            <span class="tag past" role="status" aria-live="polite">Completed</span>
-                        </div>
-                        <img src="../../public/images/events/basketball.png" alt="Basketball Tournament"
-                            aria-labelledby="event-1-heading" />
-                        <div class="event-content">
-                            <h3 id="event-1-heading">Basketball Tournament</h3>
-                            <p>
-                                <i class="fa fa-location-dot" aria-hidden="true"></i> Mandalay
-                                Stadium
-                            </p>
-                            <p>
-                                <i class="fa fa-calendar-alt" aria-hidden="true"></i> 25th
-                                December 2024
-                            </p>
-                            <p><i class="fa fa-clock" aria-hidden="true"></i> 3:00 PM</p>
-                            <p>
-                                <i class="fa fa-child" aria-hidden="true"></i> Age Group:
-                                16-25 years
-                            </p>
-                            <p id="event-1-description" class="event-summary">
-                                The basketball tournament was a huge success with fierce
-                                competition and amazing sportsmanship.
-                            </p>
-                            <a href="./eventdetails.html" class="details-btn"
-                                aria-label="View details of Basketball Tournament">
-                                <button type="button">View Details</button>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Event Card 1 -->
-                <div class="col-md-4" role="region" aria-labelledby="event-1-heading">
-                    <div class="event-card" aria-describedby="event-1-description">
-                        <div class="event-status">
-                            <span class="tag past" role="status" aria-live="polite">Completed</span>
-                        </div>
-                        <img src="../../public/images/events/basketball.png" alt="Basketball Tournament"
-                            aria-labelledby="event-1-heading" />
-                        <div class="event-content">
-                            <h3 id="event-1-heading">Basketball Tournament</h3>
-                            <p>
-                                <i class="fa fa-location-dot" aria-hidden="true"></i> Mandalay
-                                Stadium
-                            </p>
-                            <p>
-                                <i class="fa fa-calendar-alt" aria-hidden="true"></i> 25th
-                                December 2024
-                            </p>
-                            <p><i class="fa fa-clock" aria-hidden="true"></i> 3:00 PM</p>
-                            <p>
-                                <i class="fa fa-child" aria-hidden="true"></i> Age Group:
-                                16-25 years
-                            </p>
-                            <p id="event-1-description" class="event-summary">
-                                The basketball tournament was a huge success with fierce
-                                competition and amazing sportsmanship.
-                            </p>
-                            <a href="./eventdetails.html" class="details-btn"
-                                aria-label="View details of Basketball Tournament">
-                                <button type="button">View Details</button>
-                            </a>
-                        </div>
-                    </div>
-                </div>
+                <?php } ?>
             </div>
         </div>
     </section>

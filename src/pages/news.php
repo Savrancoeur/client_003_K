@@ -1,3 +1,46 @@
+<?php
+
+// to show error codes
+ini_set("display_errors", 1);
+
+// call dbconnection file to use
+require_once "dbconnect.php";
+
+// creat session if not created
+if (!isset($_SESSION)) {
+    session_start();
+}
+
+function newevnets()
+{
+    try {
+        $conn = connect();
+        $stmt = $conn->prepare("SELECT * FROM events WHERE status=? ORDER BY id DESC");
+        $stmt->execute(['upcoming']);
+        return $stmt->fetchAll();
+    } catch (PDOException $e) {
+        echo $e->getMessage();
+    }
+}
+
+function completeevents()
+{
+    try {
+        $conn = connect();
+        $stmt = $conn->prepare("SELECT * FROM events WHERE status=? ORDER BY id DESC");
+        $stmt->execute(['finished']);
+        return $stmt->fetchAll();
+    } catch (PDOException $e) {
+        echo $e->getMessage();
+    }
+}
+
+$upcomingevents = newevnets();
+$pastevents = completeevents();
+
+
+?>
+
 <!DOCTYPE html>
 <html class="no-js" lang="en">
 
@@ -99,46 +142,44 @@
 
                 <ul class="navbar-nav ml-auto d-flex align-items-center">
                     <!-- Sign In/Up Dropdown -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="signInDropdown" role="button"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Sign In/Up
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="signInDropdown">
-                            <a class="dropdown-item" href="./login.php" aria-label="Navigate to Login">Login</a>
-                            <a class="dropdown-item" href="./register.php"
-                                aria-label="Navigate to Register">Register</a>
-                        </div>
-                    </li>
 
-                    <!-- Profile Dropdown -->
-                    <li class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" id="profileDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false" aria-label="Profile Menu">
-                            <img src="../../public/images/pf_logo.png" style="width: 30px" alt="Profile"
-                                class="profile-pic" />
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-                            <li>
-                                <a class="dropdown-item" href="./admin.php" aria-label="Go to Admin Panel">
-                                    Admin
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="./profile.php" aria-label="Go to Member Dashboard">
-                                    Member
-                                </a>
-                            </li>
-                            <li>
-                                <hr class="dropdown-divider" />
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="./logout.php" aria-label="Logout">
-                                    Logout
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
+                    <?php if (!isset($_SESSION['email'])) { ?>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="signInDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Sign In/Up
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="signInDropdown">
+                                <a class="dropdown-item" href="./login.php" aria-label="Navigate to Login">Login</a>
+                                <a class="dropdown-item" href="./register.php"
+                                    aria-label="Navigate to Register">Register</a>
+                            </div>
+                        </li>
+                    <?php } else { ?>
+                        <!-- Profile Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" id="profileDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false" aria-label="Profile Menu">
+                                <img src="../../public/images/pf_logo.png" style="width: 30px" alt="Profile"
+                                    class="profile-pic" />
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                                <li>
+                                    <a class="dropdown-item" href="./profile.php" aria-label="Go to Member Dashboard">
+                                        Profile
+                                    </a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider" />
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="./logoutfunction.php" aria-label="Logout">
+                                        Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    <?php } ?>
                 </ul>
             </div>
         </div>
@@ -199,74 +240,40 @@
         <div class="container">
             <h2>Upcoming Events</h2>
             <div class="row">
-                <!-- Event Card 1 -->
-                <div class="col-md-4">
-                    <div class="event-card">
-                        <div class="event-status">
-                            <span class="tag upcoming">Upcoming</span>
-                        </div>
-                        <img src="../../public/images/events/basketball.png" alt="Basketball Tournament" />
-                        <div class="event-content">
-                            <h3>Basketball Tournament</h3>
-                            <p><i class="fa fa-location-dot"></i> Mandalay Stadium</p>
-                            <p><i class="fa fa-calendar-alt"></i> 25th December 2024</p>
-                            <p><i class="fa fa-clock"></i> 3:00 PM</p>
-                            <p><i class="fa fa-child"></i> Age Group: 16-25 years</p>
-                            <a href="./auth.html" class="register-btn">
-                                <button type="button">Register</button>
-                            </a>
-                            <a href="./eventdetails.html" class="details-btn">
-                                <button type="button">Details</button>
-                            </a>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Event Card 1 -->
-                <div class="col-md-4">
-                    <div class="event-card">
-                        <div class="event-status">
-                            <span class="tag upcoming">Upcoming</span>
-                        </div>
-                        <img src="../../public/images/events/basketball.png" alt="Basketball Tournament" />
-                        <div class="event-content">
-                            <h3>Basketball Tournament</h3>
-                            <p><i class="fa fa-location-dot"></i> Mandalay Stadium</p>
-                            <p><i class="fa fa-calendar-alt"></i> 25th December 2024</p>
-                            <p><i class="fa fa-clock"></i> 3:00 PM</p>
-                            <p><i class="fa fa-child"></i> Age Group: 16-25 years</p>
-                            <a href="./auth.html" class="register-btn">
-                                <button type="button">Register</button>
-                            </a>
-                            <a href="./eventdetails.html" class="details-btn">
-                                <button type="button">Details</button>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Event Card 1 -->
-                <div class="col-md-4">
-                    <div class="event-card">
-                        <div class="event-status">
-                            <span class="tag upcoming">Upcoming</span>
-                        </div>
-                        <img src="../../public/images/events/basketball.png" alt="Basketball Tournament" />
-                        <div class="event-content">
-                            <h3>Basketball Tournament</h3>
-                            <p><i class="fa fa-location-dot"></i> Mandalay Stadium</p>
-                            <p><i class="fa fa-calendar-alt"></i> 25th December 2024</p>
-                            <p><i class="fa fa-clock"></i> 3:00 PM</p>
-                            <p><i class="fa fa-child"></i> Age Group: 16-25 years</p>
-                            <a href="./auth.html" class="register-btn">
-                                <button type="button">Register</button>
-                            </a>
-                            <a href="./eventdetails.html" class="details-btn">
-                                <button type="button">Details</button>
-                            </a>
+                <?php foreach ($upcomingevents as $event) { ?>
+                    <div class="col-md-4">
+                        <div class="event-card">
+                            <div class="event-status">
+                                <span class="tag <?php if ($event['status'] == "upcoming") {
+                                                        echo "upcoming";
+                                                    } else {
+                                                        echo "past";
+                                                    } ?>"><?php echo ucwords($event['status']) ?></span>
+                            </div>
+                            <img src="../../<?php echo $event['image'] ?>" alt="Basketball Tournament" />
+                            <div class="event-content">
+                                <h3><?php echo ucwords($event['name']) ?></h3>
+                                <p><i class="fa fa-location-dot"></i> <?php echo ucwords($event['location']) ?></p>
+                                <p><i class="fa fa-calendar-alt"></i> <?php echo date("j-F-Y", strtotime($event['date'])); ?></p>
+                                <p><i class="fa fa-clock"></i> <?php echo $event['time'] ?></p>
+                                <p><i class="fa fa-child"></i> Age Group: <?php echo ucwords($event['agegroup']) ?></p>
+                                <?php if (isset($_SESSION['email'])) { ?>
+                                    <a href="profile.php?eventid=<?php echo $event['id'] ?>" class="register-btn">
+                                        <button type="button">Register</button>
+                                    </a>
+                                <?php } else { ?>
+                                    <a href="#" class="register-btn">
+                                        <button type="button">Register</button>
+                                    </a>
+                                <?php } ?>
+                                <a href="./eventdetails.php?eventid=<?php echo $event['id'] ?>" class="details-btn">
+                                    <button type="button">Details</button>
+                                </a>
+                            </div>
                         </div>
                     </div>
-                </div>
+                <?php } ?>
             </div>
         </div>
     </section>
@@ -276,63 +283,31 @@
         <div class="container">
             <h2>Completed Events</h2>
             <div class="row">
-                <!-- Event Card 1 -->
-                <div class="col-md-4">
-                    <div class="event-card">
-                        <div class="event-status">
-                            <span class="tag past">Past</span>
-                        </div>
-                        <img src="../../public/images/events/basketball.png" alt="Basketball Tournament" />
-                        <div class="event-content">
-                            <h3>Basketball Tournament</h3>
-                            <p><i class="fa fa-location-dot"></i> Mandalay Stadium</p>
-                            <p><i class="fa fa-calendar-alt"></i> 25th December 2024</p>
-                            <p><i class="fa fa-clock"></i> 3:00 PM</p>
-                            <p><i class="fa fa-child"></i> Age Group: 16-25 years</p>
-                            <a href="./eventdetails.html" class="details-btn">
-                                <button type="button">Details</button>
-                            </a>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="col-md-4">
-                    <div class="event-card">
-                        <div class="event-status">
-                            <span class="tag past">Past</span>
-                        </div>
-                        <img src="../../public/images/events/basketball.png" alt="Basketball Tournament" />
-                        <div class="event-content">
-                            <h3>Basketball Tournament</h3>
-                            <p><i class="fa fa-location-dot"></i> Mandalay Stadium</p>
-                            <p><i class="fa fa-calendar-alt"></i> 25th December 2024</p>
-                            <p><i class="fa fa-clock"></i> 3:00 PM</p>
-                            <p><i class="fa fa-child"></i> Age Group: 16-25 years</p>
-                            <a href="./eventdetails.html" class="details-btn">
-                                <button type="button">Details</button>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="event-card">
-                        <div class="event-status">
-                            <span class="tag past">Past</span>
-                        </div>
-                        <img src="../../public/images/events/basketball.png" alt="Basketball Tournament" />
-                        <div class="event-content">
-                            <h3>Basketball Tournament</h3>
-                            <p><i class="fa fa-location-dot"></i> Mandalay Stadium</p>
-                            <p><i class="fa fa-calendar-alt"></i> 25th December 2024</p>
-                            <p><i class="fa fa-clock"></i> 3:00 PM</p>
-                            <p><i class="fa fa-child"></i> Age Group: 16-25 years</p>
-                            <a href="./eventdetails.html" class="details-btn">
-                                <button type="button">Details</button>
-                            </a>
+                <?php foreach ($pastevents as $event) { ?>
+                    <div class="col-md-4">
+                        <div class="event-card">
+                            <div class="event-status">
+                                <span class="tag <?php if ($event['status'] == "upcoming") {
+                                                        echo "upcoming";
+                                                    } else {
+                                                        echo "past";
+                                                    } ?>"><?php echo ucwords($event['status']) ?></span>
+                            </div>
+                            <img src="../../<?php echo $event['image'] ?>" alt="Basketball Tournament" />
+                            <div class="event-content">
+                                <h3><?php echo ucwords($event['name']) ?></h3>
+                                <p><i class="fa fa-location-dot"></i> <?php echo ucwords($event['location']) ?></p>
+                                <p><i class="fa fa-calendar-alt"></i> <?php echo date("j-F-Y", strtotime($event['date'])); ?></p>
+                                <p><i class="fa fa-clock"></i> <?php echo $event['time'] ?></p>
+                                <p><i class="fa fa-child"></i> Age Group: <?php echo ucwords($event['agegroup']) ?></p>
+                                <a href="./eventdetails.php?eventid=<?php echo $event['id'] ?>" class="details-btn">
+                                    <button type="button">View Details</button>
+                                </a>
+                            </div>
                         </div>
                     </div>
-                </div>
+                <?php } ?>
             </div>
         </div>
     </section>
