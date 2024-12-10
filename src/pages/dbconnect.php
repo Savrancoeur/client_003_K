@@ -3,7 +3,7 @@
     function connect(){
         $server = "localhost";
         $user = "root";
-        $password = "mydbserver2025";
+        $password = "";
         try{
             $conn = new PDO("mysql:host=$server;port=3306;dbname=aus", $user, $password);
             $conn -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
