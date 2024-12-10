@@ -94,6 +94,11 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['signup'])) {
                 $stmt->execute();
                 $_SESSION['email'] = $email;
                 $_SESSION['signup-success'] = "You have successfully registered";
+
+                $sql = "UPDATE users SET status=1 WHERE email=?";
+                $stmt = $conn->prepare($sql);
+                $stmt->execute([$email]);
+
                 header("Location:index.php");
             }else{
                 $_SESSION['not-strong-password'] = "Your password is not strong enough";

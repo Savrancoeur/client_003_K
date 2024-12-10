@@ -25,6 +25,11 @@ if($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['login'])){
             if(password_verify($password, $member['password'])){
                 $_SESSION['login-success'] = "You have successfully logged in";
                 $_SESSION['email'] = $email;
+
+                $sql = "UPDATE users SET status=1 WHERE email=?";
+                $stmt = $conn->prepare($sql);
+                $stmt->execute([$email]);
+
                 header("Location: index.php");
             }else{
 
@@ -41,6 +46,11 @@ if($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['login'])){
                 if(password_verify($password, $admin['password'])){
                     $_SESSION['login-success'] = "You have successfully logged in";
                     $_SESSION['email'] = $email;
+
+                    $sql = "UPDATE admins SET status=1 WHERE email=?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->execute([$email]);
+
                     header("Location: admin/index.php");
                 }else{
                     $_SESSION['login-error'] = "Your Password might be incorrect";
