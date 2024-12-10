@@ -11,6 +11,14 @@ if (!isset($_SESSION)) {
     session_start();
 }
 
+$toastmessage = null;
+
+if (isset($_SESSION['success-sending'])) {
+    $toastmessage = $_SESSION['success-sending'];
+}
+
+// echo $noti_message;
+
 ?>
 
 <!DOCTYPE html>
@@ -73,6 +81,7 @@ if (!isset($_SESSION)) {
 
     <!--responsive.css-->
     <link rel="stylesheet" href="../css/responsive.css" />
+    <link rel="stylesheet" href="../css/toast.css" />
 </head>
 
 <body>
@@ -167,7 +176,7 @@ if (!isset($_SESSION)) {
                 out.
             </p>
             <div class="contact-form-container">
-                <form action="submit_contact.php" method="POST" class="contact-form">
+                <form action="messagesender.php" method="POST" class="contact-form">
                     <div class="form-group">
                         <label for="name">Name</label>
                         <input type="text" id="name" name="name" class="form-control" placeholder="Enter your name"
@@ -183,7 +192,7 @@ if (!isset($_SESSION)) {
                         <textarea id="message" name="message" class="form-control" placeholder="Your message" rows="6"
                             required></textarea>
                     </div>
-                    <button type="submit" class="submit-btn">Send Message</button>
+                    <button type="submit" name="send-btn" class="submit-btn">Send Message</button>
                 </form>
                 <div class="contact-info">
                     <h3>Get in Touch</h3>
@@ -301,6 +310,26 @@ if (!isset($_SESSION)) {
     </footer>
     <!--footer end-->
 
+    <?php if ($toastmessage != null) { ?>
+        <div class="toasts actives">
+            <div class="toast-contents">
+                <i class="fas fa-check check"></i>
+
+                <div class="message">
+                    <span class="text text-1">Success</span>
+                    <span class="text text-2"><?php echo $toastmessage ?></span>
+                </div>
+            </div>
+            <i class="fas fa-times closes"></i>
+
+            <div class="progress actives"></div>
+        </div>
+    <?php
+        unset($_SESSION['success-sending']);
+        $toastmessage = '';
+    }
+    ?>
+
     <script src="../../public/libs/jquery/jquery-3.7.1.min.js"></script>
 
     <!--modernizr.min.js-->
@@ -328,6 +357,7 @@ if (!isset($_SESSION)) {
 
     <!-- footer js -->
     <script src="../js/footer.js"></script>
+    <script type="text/javascript" src="../js/toast.js"></script>
 </body>
 
 </html>
